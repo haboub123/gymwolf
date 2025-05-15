@@ -1,0 +1,14 @@
+# Dossiers à ignorer
+node_modules/
+build/
+dist/
+
+# Logs
+*.log
+
+# Fichiers système
+.DS_Store
+Thumbs.db
+
+# Environnement
+.env
