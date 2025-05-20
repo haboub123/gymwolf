@@ -9,17 +9,40 @@ const ManageSeance = () => {
   const [heure, setHeure] = useState("");
   const [duree, setDuree] = useState("");
   const [salle, setSalle] = useState("");
+  const [salles, setSalles] = useState([]);
+  const [coachs, setCoachs] = useState([]);
   const [activite, setActivite] = useState("");
   const [activites, setActivites] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const [showForm, setShowForm] = useState(false);
+  const [coach, setCoach] = useState(""); // Initialisé comme chaîne vide
 
   useEffect(() => {
+    fetchCoachs();
+    fetchSalles();
     fetchSeances();
     fetchActivites();
   }, []);
+
+  const fetchCoachs = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/users/coachs");
+      setCoachs(response.data.coachs || []);
+    } catch (error) {
+      console.error("Erreur lors du chargement des coachs:", error);
+    }
+  };
+
+  const fetchSalles = async () => {
+    try {
+      const response = await axios.get("http://localhost:5000/salle/getAllSalles");
+      setSalles(response.data.salles || []);
+    } catch (error) {
+      console.error("Erreur lors du chargement des salles:", error);
+    }
+  };
 
   const fetchSeances = async () => {
     try {
@@ -50,7 +73,8 @@ const ManageSeance = () => {
         heure,
         duree,
         salle,
-        activite
+        activite,
+        coach
       });
       const response = await axios.post("http://localhost:5000/Seance/addseance", {
         titre,
@@ -61,6 +85,14 @@ const ManageSeance = () => {
         salle,
         activite,
       });
+
+      if (coach) {
+        await axios.put("http://localhost:5000/Seance/affect", {
+          userId: coach,
+          seanceId: response.data.Seance._id
+        });
+      }
+
       setTitre("");
       setDescription("");
       setDate("");
@@ -68,6 +100,7 @@ const ManageSeance = () => {
       setDuree("");
       setSalle("");
       setActivite("");
+      setCoach("");
       setShowForm(false);
       fetchSeances(); // Rafraîchir la liste
     } catch (error) {
@@ -88,6 +121,7 @@ const ManageSeance = () => {
       setDuree(seance.duree || "");
       setSalle(seance.salle?.nom || seance.salle || "");
       setActivite(seance.activite?._id || seance.activite || "");
+      setCoach(seance.coachs?.[0] || ""); // Sélectionner le premier coach si plusieurs
       setShowForm(true);
     }
   };
@@ -105,6 +139,14 @@ const ManageSeance = () => {
         salle,
         activite,
       });
+
+      if (coach && (!seances.find(s => s._id === editId)?.coachs?.includes(coach))) {
+        await axios.put("http://localhost:5000/Seance/affect", {
+          userId: coach,
+          seanceId: editId
+        });
+      }
+
       setIsEditing(false);
       setEditId(null);
       setTitre("");
@@ -114,6 +156,7 @@ const ManageSeance = () => {
       setDuree("");
       setSalle("");
       setActivite("");
+      setCoach("");
       setShowForm(false);
       fetchSeances();
     } catch (error) {
@@ -141,6 +184,7 @@ const ManageSeance = () => {
     setDuree("");
     setSalle("");
     setActivite("");
+    setCoach("");
   };
 
   const formatDate = (dateString) => {
@@ -176,6 +220,7 @@ const ManageSeance = () => {
             setDuree("");
             setSalle("");
             setActivite("");
+            setCoach("");
             setShowForm(true);
           }}
           className="bg-green-500 text-white px-4 py-2 rounded-lg shadow-md hover:bg-green-600 transition duration-300 flex items-center gap-2"
@@ -247,15 +292,38 @@ const ManageSeance = () => {
               />
             </div>
             <div>
+              <label htmlFor="coach" className="block text-sm font-medium text-gray-700 mb-1">Coach</label>
+              <select
+                id="coach"
+                value={coach}
+                onChange={(e) => setCoach(e.target.value)}
+                className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                required
+              >
+                <option value="">Sélectionnez un coach</option>
+                {coachs.map((c) => (
+                  <option key={c._id} value={c._id}>
+                    {c.username}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
               <label htmlFor="salle" className="block text-sm font-medium text-gray-700 mb-1">Salle</label>
-              <input
+              <select
                 id="salle"
-                type="text"
                 value={salle}
                 onChange={(e) => setSalle(e.target.value)}
                 className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
                 required
-              />
+              >
+                <option value="">Sélectionnez une salle</option>
+                {salles.map((s) => (
+                  <option key={s._id} value={s._id}>
+                    {s.nom}
+                  </option>
+                ))}
+              </select>
             </div>
             <div>
               <label htmlFor="activite" className="block text-sm font-medium text-gray-700 mb-1">Activité</label>

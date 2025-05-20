@@ -30,10 +30,9 @@ export default function Navbar() {
       <div className="container mx-auto flex justify-between items-center">
         <img src={logo} alt="Gym Wolf Logo" className="h-12 w-auto" />
 
-        {/* Menu Desktop */}
         <ul className="hidden md:flex gap-8 font-medium">
           <li className="hover:text-yellow-400 transition">
-            <a href="/">Home</a>
+            <a href="/">Accueil</a>
           </li>
           <li className="hover:text-yellow-400 transition">
             <a href="/activites">Nos Activités</a>
@@ -46,29 +45,25 @@ export default function Navbar() {
               {user?.role === "client" ? "Mes abonnements" : "Nos abonnements"}
             </a>
           </li>
-
-          {/* 🔥 Nouveau lien "Mes Réservations" */}
           {user?.role === "client" && (
             <li className="hover:text-yellow-400 transition">
               <a href="/mes-reservations">Mes Réservations</a>
             </li>
           )}
-
           {!user ? (
             <li className="hover:text-yellow-400 transition">
-              <a href="/auth/login">Login</a>
+              <a href="/auth/login">Connexion</a>
             </li>
           ) : (
             <li
               className="hover:text-yellow-400 transition cursor-pointer"
               onClick={handleLogout}
             >
-              Logout
+              Déconnexion
             </li>
           )}
         </ul>
 
-        {/* Menu Mobile Toggle */}
         <div className="md:hidden">
           <button onClick={toggleMenu}>
             {isOpen ? <X size={28} /> : <Menu size={28} />}
@@ -76,10 +71,9 @@ export default function Navbar() {
         </div>
       </div>
 
-      {/* Menu Mobile */}
       {isOpen && (
         <div className="md:hidden mt-4 space-y-3 px-4">
-          <a href="/" className="block hover:text-yellow-400">Home</a>
+          <a href="/" className="block hover:text-yellow-400">Accueil</a>
           <a href="/activites" className="block hover:text-yellow-400">Nos Activités</a>
           <a href="/coachs" className="block hover:text-yellow-400">Nos entraineurs</a>
           <a
@@ -88,19 +82,16 @@ export default function Navbar() {
           >
             {user?.role === "client" ? "Mes abonnements" : "Nos abonnements"}
           </a>
-
-          {/* 🔥 Nouveau lien mobile "Mes Réservations" */}
           {user?.role === "client" && (
             <a href="/mes-reservations" className="block hover:text-yellow-400">
               Mes Réservations
             </a>
           )}
-
           {!user ? (
-            <a href="/auth/login" className="block hover:text-yellow-400">Login</a>
+            <a href="/auth/login" className="block hover:text-yellow-400">Connexion</a>
           ) : (
             <button onClick={handleLogout} className="block hover:text-yellow-400">
-              Logout
+              Déconnexion
             </button>
           )}
         </div>

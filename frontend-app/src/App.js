@@ -1,35 +1,33 @@
-import React from 'react';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
-import Login from './components/auth/Login';
-import Register from './components/auth/Register';
-import AdminDashboard from './components/dashboards/admin/AdminDashboard';
-import CoachDashboard from './components/dashboards/coach/CoachDashboard';
-import ClientDashboard from './components/dashboards/clients';
-import ManageCoachPage from './components/dashboards/admin/ManageCoachPage';
-import ManageClientPage from './components/dashboards/admin/ManageClientPage';
-import ManageActivitéPage from './components/dashboards/admin/ManageActivitéPage';
-import ManageSeancePage from './components/dashboards/admin/ManageSeancePage';
-import ManageSallePage from './components/dashboards/admin/ManageSallePage';
+import React from "react";
+import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-dom";
+import Login from "./components/auth/Login";
+import Register from "./components/auth/Register";
+import AdminDashboard from "./components/dashboards/admin/AdminDashboard";
+import CoachDashboard from "./components/dashboards/coach/CoachDashboard";
+import ClientDashboard from "./components/dashboards/clients";
+import ManageCoachPage from "./components/dashboards/admin/ManageCoachPage";
+import ManageClientPage from "./components/dashboards/admin/ManageClientPage";
+import ManageActivitéPage from "./components/dashboards/admin/ManageActivitéPage";
+import ManageSeancePage from "./components/dashboards/admin/ManageSeancePage";
+import ManageSallePage from "./components/dashboards/admin/ManageSallePage";
 import ManageAbonnementPage from "./components/dashboards/admin/ManageAbonnementPage";
 import ManageAffectationPage from "./components/dashboards/admin/ManageAffectationPage";
-import HomePage from './components/HomePage';
+import ManageAvisPage from "./components/dashboards/admin/ManageAvisPage";
+import HomePage from "./components/HomePage";
 import SeancesByActivite from "./components/SeancesByActivite";
 import AllActivitesPage from "./components/AllActivitesPage";
-import CoachsPage from './components/CoachsPage';
-import AbonnementList from './components/AbonnementList';
-import MesAbonnements from './components/MesAbonnements';
+import CoachsPage from "./components/CoachsPage";
+import CoachProfile from "./components/CoachProfile"; // Ajout
+import AbonnementList from "./components/AbonnementList";
+import MesAbonnements from "./components/MesAbonnements";
 import MesFactures from "./components/MesFactures";
 import MesReservations from "./components/MesReservations";
+import Facturation from "./components/Facturation";
+import "./App.css";
 
-
-import './App.css';
-
-// Composant pour vérifier si l'utilisateur est authentifié
 const ProtectedRoute = ({ children, requiredRole }) => {
-  // Récupérer l'utilisateur du localStorage
   const userString = localStorage.getItem("user");
 
-  // Si pas d'utilisateur, rediriger vers la page de connexion
   if (!userString) {
     return <Navigate to="/auth/login" />;
   }
@@ -37,9 +35,7 @@ const ProtectedRoute = ({ children, requiredRole }) => {
   try {
     const user = JSON.parse(userString);
 
-    // Si un rôle spécifique est requis et que l'utilisateur n'a pas ce rôle
     if (requiredRole && user.role !== requiredRole) {
-      // Rediriger selon le rôle de l'utilisateur
       if (user.role === "admin") {
         return <Navigate to="/dashboard/admin" />;
       } else if (user.role === "coach") {
@@ -49,10 +45,9 @@ const ProtectedRoute = ({ children, requiredRole }) => {
       }
     }
 
-    // Si tout est bon, afficher le composant enfant
     return children;
   } catch (error) {
-    console.error("Error parsing user data:", error);
+    console.error("Erreur lors de l'analyse des données utilisateur :", error);
     localStorage.removeItem("user");
     return <Navigate to="/auth/login" />;
   }
@@ -63,17 +58,23 @@ function App() {
     <Router>
       <div className="App">
         <Routes>
-          {/* Auth Pages */}
           <Route path="/auth/login" element={<Login />} />
           <Route path="/auth/register" element={<Register />} />
-          <Route path="/auth/forget" element={<h2>Forgot Password Page</h2>} />
+          <Route path="/auth/forget" element={<h2>Page Mot de Passe Oublié</h2>} />
 
-          {/* Admin Routes */}
           <Route
             path="/dashboard/admin"
             element={
               <ProtectedRoute requiredRole="admin">
                 <AdminDashboard />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/manage-avis"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <ManageAvisPage />
               </ProtectedRoute>
             }
           />
@@ -116,12 +117,24 @@ function App() {
                 <ManageSallePage />
               </ProtectedRoute>
             }
-          /><Route path="/admin/manage-abonnement" 
-          element=
-          {<ManageAbonnementPage />} />
-          <Route path="/admin/manage-affectation" element={<ManageAffectationPage />} />
+          />
+          <Route
+            path="/admin/manage-abonnement"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <ManageAbonnementPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin/manage-affectation"
+            element={
+              <ProtectedRoute requiredRole="admin">
+                <ManageAffectationPage />
+              </ProtectedRoute>
+            }
+          />
 
-          {/* Coach Routes */}
           <Route
             path="/dashboard/coach"
             element={
@@ -131,7 +144,6 @@ function App() {
             }
           />
 
-          {/* Client Routes */}
           <Route
             path="/dashboard/client"
             element={
@@ -141,15 +153,13 @@ function App() {
             }
           />
 
-          {/* Public Routes */}
           <Route path="/" element={<HomePage />} />
           <Route path="/activite/:id" element={<SeancesByActivite />} />
           <Route path="/coachs" element={<CoachsPage />} />
+          <Route path="/coach-profile/:id" element={<CoachProfile />} /> {/* Ajout */}
           <Route path="/abonnement" element={<AbonnementList />} />
           <Route path="/activites" element={<AllActivitesPage />} />
-         
 
-          {/* Protected Routes (need authentication but no specific role) */}
           <Route
             path="/mes-abonnements"
             element={
@@ -157,26 +167,32 @@ function App() {
                 <MesAbonnements />
               </ProtectedRoute>
             }
-
-
-          /> 
-           {/* Nouvelle route protégée pour les factures */}
-          <Route 
-            path="/mes-factures" 
+          />
+          <Route
+            path="/mes-factures"
             element={
               <ProtectedRoute>
                 <MesFactures />
               </ProtectedRoute>
-            } 
+            }
           />
-           <Route path="/mes-reservations" element={
-          <ProtectedRoute>
-            <MesReservations />
-          </ProtectedRoute>
-        } />
-        
+          <Route
+            path="/mes-reservations"
+            element={
+              <ProtectedRoute>
+                <MesReservations />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/facturation"
+            element={
+              <ProtectedRoute>
+                <Facturation />
+              </ProtectedRoute>
+            }
+          />
 
-          {/* Fallback Route */}
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </div>

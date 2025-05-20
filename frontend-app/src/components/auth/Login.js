@@ -16,7 +16,6 @@ export default function Login() {
 
   const navigate = useNavigate();
 
-  // Check if user is already logged in
   useEffect(() => {
     const checkLoggedIn = () => {
       try {
@@ -31,7 +30,7 @@ export default function Login() {
           }
         }
       } catch (error) {
-        console.error("Error checking logged in status:", error);
+        console.error("Erreur lors de la vérification du statut de connexion :", error);
         localStorage.removeItem("user");
       }
     };
@@ -64,21 +63,18 @@ export default function Login() {
 
       localStorage.setItem("user", JSON.stringify(data.user));
       
-      // Check for pending reservation
       const pendingReservation = sessionStorage.getItem("pendingReservation");
       
       if (pendingReservation) {
-        setSuccessMessage("Connexion réussie! Finalisation de votre réservation...");
+        setSuccessMessage("Connexion réussie ! Finalisation de votre réservation...");
         
-        // Short delay to show success message
         setTimeout(() => {
           setIsLoading(false);
           navigate("/mes-reservations");
         }, 1500);
       } else {
-        setSuccessMessage("Connexion réussie!");
+        setSuccessMessage("Connexion réussie !");
         
-        // Short delay to show success message
         setTimeout(() => {
           setIsLoading(false);
           const role = data.user.role;
@@ -94,7 +90,7 @@ export default function Login() {
         }, 1500);
       }
     } catch (error) {
-      console.error("Login Error:", error);
+      console.error("Erreur de connexion :", error);
       setError(error.message || "Une erreur s'est produite. Veuillez réessayer.");
       setIsLoading(false);
     }
@@ -104,7 +100,7 @@ export default function Login() {
     <div className="login-container">
       <div className="login-wrapper">
         <div className="login-form">
-          <h2 className="login-title">Login</h2>
+          <h2 className="login-title">Connexion</h2>
           
           {error && <div className="error-message">{error}</div>}
           {successMessage && <div className="success-message">{successMessage}</div>}
@@ -124,12 +120,12 @@ export default function Login() {
               />
             </div>
             <div className="form-group">
-              <label className="label" htmlFor="password">Password</label>
+              <label className="label" htmlFor="password">Mot de passe</label>
               <input
                 type="password"
                 id="password"
                 className="input"
-                placeholder="Password"
+                placeholder="Mot de passe"
                 value={formData.password}
                 onChange={handleInputChange}
                 disabled={isLoading}
@@ -146,7 +142,7 @@ export default function Login() {
                   onChange={handleInputChange}
                   disabled={isLoading}
                 />
-                <span className="checkbox-text">Remember me</span>
+                <span className="checkbox-text">Se souvenir de moi</span>
               </label>
             </div>
             <button 
@@ -158,7 +154,7 @@ export default function Login() {
             </button>
           </form>
           <div className="links">
-            <Link to="/auth/forget" className="link">Mot de passe oublié?</Link>
+            <Link to="/auth/forget" className="link">Mot de passe oublié ?</Link>
             <Link to="/auth/register" className="link">Créer un compte</Link>
           </div>
         </div>

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { useNavigate, useLocation } from 'react-router-dom';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import axios from "axios";
 
 export default function Facturation() {
   const navigate = useNavigate();
@@ -51,7 +51,7 @@ export default function Facturation() {
       }
       
       // 1. Créer une facture
-      const factureResponse = await axios.post("http://localhost:5000/facture/addFacture", {
+      const factureResponse = await axios.post("http://localhost:5000/Facture/addFacture", {
         montant: abonnement.prix,
         date: new Date(),
         methode: methodePaiement,
@@ -64,22 +64,27 @@ export default function Facturation() {
       
       const factureId = factureResponse.data.facture._id;
       
-      // 2. Affecter la facture et l'abonnement à l'utilisateur
-      await axios.put("http://localhost:5000/facture/affect", {
+      // 2. Affecter la facture à l'utilisateur
+      await axios.put("http://localhost:5000/Facture/affect", {
         userId: userId,
-        factureId: factureId,
+        factureId: factureId
+      });
+      
+      // 3. Affecter l'abonnement à l'utilisateur
+      await axios.put("http://localhost:5000/Abonnement/affect", {
+        userId: userId,
         abonnementId: abonnement._id
       });
       
-      // 3. Afficher un message de succès avant la redirection
-      setSuccess("Votre achat a été effectué avec succès. Vous allez être redirigé vers vos factures.");
+      // 4. Afficher un message de succès avant la redirection
+      setSuccess("Votre achat a été effectué avec succès. Vous allez être redirigé vers vos abonnements.");
       
-      // 4. Supprimer l'abonnement temporaire du localStorage
+      // 5. Supprimer l'abonnement temporaire du localStorage
       localStorage.removeItem("abonnementEnCours");
       
-      // 5. Rediriger vers la page des factures après un court délai
+      // 6. Rediriger vers la page des abonnements après un court délai
       setTimeout(() => {
-        navigate("/mes-factures");
+        navigate("/mes-abonnements");
       }, 2000);
       
     } catch (error) {

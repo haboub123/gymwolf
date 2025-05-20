@@ -20,6 +20,7 @@ export default function ManageCoach({ color }) {
     email: "",
     password: "",
     specialite: "",
+    age: "", // Ajout du champ age
   });
   const [message, setMessage] = useState({ text: "", type: "" });
 
@@ -69,12 +70,13 @@ export default function ManageCoach({ color }) {
       email: coach.email,
       password: "",
       specialite: coach.specialite || "",
+      age: coach.age || "", // Ajout du champ age dans la mise à jour
     });
     setIsUpdateModalOpen(true);
   };
 
   const handleAddCoach = () => {
-    setFormData({ username: "", email: "", password: "", specialite: "" });
+    setFormData({ username: "", email: "", password: "", specialite: "", age: "" }); // Initialisation de age
     setIsAddModalOpen(true);
   };
 
@@ -82,13 +84,22 @@ export default function ManageCoach({ color }) {
     e.preventDefault();
     try {
       if (isAddModalOpen) {
-        await addUserCoach(formData);
+        // Filtrer les champs pour ne pas envoyer age s'il est vide
+        const coachData = {
+          username: formData.username,
+          email: formData.email,
+          password: formData.password,
+          specialite: formData.specialite,
+          ...(formData.age && { age: formData.age }), // Inclure age uniquement s'il est défini et non vide
+        };
+        await addUserCoach(coachData);
         setMessage({ text: "Coach added successfully!", type: "success" });
       } else if (isUpdateModalOpen && selectedCoach) {
         await updateUserById(selectedCoach._id, {
           username: formData.username,
           email: formData.email,
           specialite: formData.specialite,
+          age: formData.age, // Ajout du champ age dans la mise à jour
         });
         setMessage({ text: "Coach updated successfully!", type: "success" });
       }
@@ -115,7 +126,7 @@ export default function ManageCoach({ color }) {
     setIsAddModalOpen(false);
     setIsUpdateModalOpen(false);
     setSelectedCoach(null);
-    setFormData({ username: "", email: "", password: "", specialite: "" });
+    setFormData({ username: "", email: "", password: "", specialite: "", age: "" }); // Réinitialisation de age
     setMessage({ text: "", type: "" });
   };
 
@@ -308,6 +319,18 @@ export default function ManageCoach({ color }) {
                     </option>
                   ))}
                 </select>
+              </div>
+              <div className="mb-4">
+                <label className="block text-sm font-medium">Age</label>
+                <input
+                  type="number"
+                  value={formData.age}
+                  onChange={(e) =>
+                    setFormData({ ...formData, age: e.target.value })
+                  }
+                  className="w-full border px-3 py-2 rounded"
+                  placeholder="Enter age"
+                />
               </div>
               <div className="flex justify-end space-x-2">
                 <button

@@ -1,6 +1,8 @@
+// MesReservations.js
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
+import AddAvis from "../components/AddAvis";
 
 export default function MesReservations() {
   const [reservations, setReservations] = useState([]);
@@ -9,7 +11,6 @@ export default function MesReservations() {
   const [notification, setNotification] = useState(null);
 
   useEffect(() => {
-    // Check for pending reservation (now using sessionStorage)
     const pendingReservation = sessionStorage.getItem("pendingReservation");
     if (pendingReservation) {
       handlePendingReservation(JSON.parse(pendingReservation));
@@ -18,62 +19,39 @@ export default function MesReservations() {
     }
   }, []);
 
-  // Handle pending reservation after login
   const handlePendingReservation = async (reservationData) => {
     try {
       setNotification("Finalisation de votre réservation...");
-      
-      // Create reservation
       const response = await axios.post(
         "http://localhost:5000/Reservation/addReservation",
         reservationData,
         { withCredentials: true }
       );
-
       if (response.data && response.data.reservation) {
-        // Assign reservation to logged-in user
         await axios.put(
           "http://localhost:5000/Reservation/affect",
-          {
-            reservationId: response.data.reservation._id,
-            // userId extracted from token on backend
-          },
+          { reservationId: response.data.reservation._id },
           { withCredentials: true }
         );
-
-        // Clear pending reservation
         sessionStorage.removeItem("pendingReservation");
-        
-        // Show success notification
         setNotification("Réservation créée avec succès!");
-        
-        // Fetch updated reservations list
         fetchReservations();
-        
-        // Clear notification after 3 seconds
         setTimeout(() => setNotification(null), 3000);
       }
     } catch (error) {
       console.error("Erreur lors de la création de la réservation:", error);
-      setError(
-        "Erreur lors de la réservation: " + 
-        (error.response?.data?.message || error.message)
-      );
+      setError("Erreur lors de la réservation: " + (error.response?.data?.message || error.message));
       setLoading(false);
-      
-      // Clean up pending reservation on error
       sessionStorage.removeItem("pendingReservation");
     }
   };
 
-  // Fetch user's reservations
   const fetchReservations = async () => {
     try {
       const response = await axios.get(
         "http://localhost:5000/Reservation/getUserReservations",
         { withCredentials: true }
       );
-
       if (response.data && response.data.reservations) {
         setReservations(response.data.reservations);
       }
@@ -85,30 +63,31 @@ export default function MesReservations() {
     }
   };
 
-  // Cancel a reservation
   const cancelReservation = async (id) => {
-    if (!window.confirm("Êtes-vous sûr de vouloir annuler cette réservation?")) {
-      return;
-    }
-    
+    if (!window.confirm("Êtes-vous sûr de vouloir annuler cette réservation?")) return;
     try {
       setLoading(true);
-      await axios.delete(
-        `http://localhost:5000/Reservation/deleteReservationById/${id}`,
-        { withCredentials: true }
-      );
-      
-      // Update reservations list
-      setReservations(reservations.filter((reservation) => reservation._id !== id));
+      await axios.delete(`http://localhost:5000/Reservation/deleteReservationById/${id}`, { withCredentials: true });
+      setReservations(reservations.filter((r) => r._id !== id));
       setNotification("Réservation annulée avec succès");
-      
-      // Clear notification after 3 seconds
       setTimeout(() => setNotification(null), 3000);
       setLoading(false);
     } catch (error) {
-      console.error("Erreur lors de l'annulation de la réservation:", error);
-      setError("Erreur lors de l'annulation de la réservation. Veuillez réessayer.");
+      console.error("Erreur lors de l'annulation:", error);
+      setError("Erreur lors de l'annulation. Veuillez réessayer.");
       setLoading(false);
+    }
+  };
+
+  // Vérifier si la séance est terminée
+  const isSeanceTerminee = (reservation) => {
+    try {
+      const seanceDateTime = new Date(`${new Date(reservation.date).toISOString().split('T')[0]}T${reservation.heure}`);
+      const now = new Date();
+      return seanceDateTime < now;
+    } catch (error) {
+      console.error("Erreur lors de la vérification de la date de la séance:", error);
+      return false;
     }
   };
 
@@ -117,25 +96,12 @@ export default function MesReservations() {
   return (
     <div className="container mx-auto px-4 py-10">
       <h2 className="text-3xl font-bold mb-6">Mes Réservations</h2>
-
-      {notification && (
-        <div className="bg-green-100 text-green-700 p-4 mb-6 rounded">
-          {notification}
-        </div>
-      )}
-      
+      {notification && <div className="bg-green-100 text-green-700 p-4 mb-6 rounded">{notification}</div>}
       {error && (
         <div className="bg-red-100 text-red-700 p-4 mb-6 rounded">
-          {error}
-          <button 
-            onClick={() => setError(null)} 
-            className="float-right font-bold"
-          >
-            ×
-          </button>
+          {error} <button onClick={() => setError(null)} className="float-right font-bold">×</button>
         </div>
       )}
-
       {reservations.length === 0 ? (
         <div className="bg-gray-100 p-6 rounded text-center">
           <p className="mb-4">Vous n'avez pas encore de réservations.</p>
@@ -157,6 +123,13 @@ export default function MesReservations() {
               >
                 {loading ? "En cours..." : "Annuler la réservation"}
               </button>
+              {isSeanceTerminee(reservation) ? (
+                <AddAvis seanceId={reservation.seance} reservationId={reservation._id} />
+              ) : (
+                <p className="mt-4 text-sm text-gray-500">
+                  Vous pourrez laisser un avis après la séance ({new Date(reservation.date).toLocaleDateString()} à {reservation.heure}).
+                </p>
+              )}
             </div>
           ))}
         </div>
