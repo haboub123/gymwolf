@@ -1,8 +1,10 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import axios from "axios";
 import Footer from "./Footer";
 import ActiviteSection from "./ActiviteSection";
 import CoachSection from "./CoachSection";
+import AvisSection from "./AvisSection"; // Importation du nouveau composant
 
 export default function LandingFitness() {
   return (
@@ -106,6 +108,9 @@ export default function LandingFitness() {
 
         {/* Section Coachs */}
         <CoachSection />
+
+        {/* Section Avis */}
+        <AvisSection /> {/* Intégration du nouveau composant */}
 
         {/* Footer */}
         <Footer />

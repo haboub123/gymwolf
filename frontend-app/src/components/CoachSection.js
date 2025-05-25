@@ -1,18 +1,11 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-
-// Import des images
-import team1 from "../assets/img/team-1-800x800.jpg";
-import team2 from "../assets/img/team-2-800x800.jpg";
-import team3 from "../assets/img/team-3-800x800.jpg";
-import placeholder from "../assets/img/team-4-470x470.png"; // Utilisé comme fallback
+import placeholder from "../assets/img/team-4-470x470.png"; // Image par défaut
 
 export default function CoachSection() {
   const [coaches, setCoaches] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const images = [team2, team3, team1]; // Associe 3 images
 
   useEffect(() => {
     setLoading(true);
@@ -35,14 +28,14 @@ export default function CoachSection() {
 
   const handleImageError = (e) => {
     e.target.onerror = null;
-    e.target.src = placeholder; // Fallback si image cassée
+    e.target.src = placeholder; // Image de secours si l'image n'est pas trouvée
   };
 
   return (
     <section className="pt-20 pb-48 bg-gradient-to-t from-blueGray-100 to-white">
       <div className="container mx-auto px-4">
         <div className="text-center mb-16">
-          <h2 className="text-4xl font-semibold text-gray-900">Découvrez Nos Coachs d’Excellence</h2>
+          <h2 className="text-4xl font-semibold text-gray-900">Découvrez Nos Coachs d'Excellence</h2>
           <p className="text-blueGray-500 mt-4">
             Des experts passionnés prêts à vous propulser vers vos objectifs.
           </p>
@@ -58,8 +51,10 @@ export default function CoachSection() {
               <div key={i} className="w-full md:w-4/12 lg:w-3/12 px-4 mb-12">
                 <div className="px-6 text-center">
                   <img
-                    alt={`coach-${i + 1}`}
-                    src={images[i] || placeholder}
+                    alt={`coach-${coach.username}`}
+                    src={coach.user_image 
+                      ? `http://localhost:5000/files/${coach.user_image}` 
+                      : placeholder}
                     className="shadow-lg rounded-full mx-auto max-w-120-px h-120-px object-cover transform hover:scale-110 transition-all duration-300"
                     onError={handleImageError}
                   />

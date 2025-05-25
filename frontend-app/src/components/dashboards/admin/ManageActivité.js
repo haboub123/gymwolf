@@ -5,6 +5,8 @@ const ManageActivite = () => {
   const [activites, setActivites] = useState([]);
   const [nom, setNom] = useState("");
   const [description, setDescription] = useState("");
+  const [image, setImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
@@ -27,21 +29,50 @@ const ManageActivite = () => {
     setIsEditing(false);
     setNom("");
     setDescription("");
+    setImage(null);
+    setImagePreview(null);
     setShowForm(true);
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleAdd = async (e) => {
     e.preventDefault();
     try {
-      const response = await axios.post("http://localhost:5000/Activite/addActivite", {
-        nom,
-        description,
-      });
+      const formData = new FormData();
+      formData.append("nom", nom);
+      formData.append("description", description);
+      if (image) {
+        formData.append("image", image);
+      }
+
+      const response = await axios.post(
+        "http://localhost:5000/Activite/addActivite", 
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+      
       // Sécurisation de la réponse du backend
-      const nouvelleActivite = response.data.activite || response.data;
+      const nouvelleActivite = response.data.Activite || response.data;
       setActivites([...activites, nouvelleActivite]);
       setNom("");
       setDescription("");
+      setImage(null);
+      setImagePreview(null);
       setShowForm(false);
     } catch (error) {
       console.error("Erreur lors de l'ajout :", error);
@@ -64,6 +95,12 @@ const ManageActivite = () => {
       setEditId(id);
       setNom(activite.nom);
       setDescription(activite.description);
+      // Si l'activité a une image, on prépare l'aperçu
+      if (activite.image) {
+        setImagePreview(`http://localhost:5000${activite.image}`);
+      } else {
+        setImagePreview(null);
+      }
       setShowForm(true);
     }
   };
@@ -71,17 +108,32 @@ const ManageActivite = () => {
   const handleUpdate = async (e) => {
     e.preventDefault();
     try {
-      await axios.put(`http://localhost:5000/Activite/updateActivite/${editId}`, {
-        nom,
-        description,
-      });
-      setActivites(
-        activites.map((a) => (a._id === editId ? { ...a, nom, description } : a))
+      const formData = new FormData();
+      formData.append("nom", nom);
+      formData.append("description", description);
+      if (image) {
+        formData.append("image", image);
+      }
+
+      await axios.put(
+        `http://localhost:5000/Activite/updateActivite/${editId}`,
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
       );
+      
+      // Mettre à jour l'état local
+      fetchActivites(); // Recharger toutes les activités pour avoir l'URL de l'image mise à jour
+      
       setIsEditing(false);
       setEditId(null);
       setNom("");
       setDescription("");
+      setImage(null);
+      setImagePreview(null);
       setShowForm(false);
     } catch (error) {
       console.error("Erreur lors de la mise à jour :", error);
@@ -136,6 +188,31 @@ const ManageActivite = () => {
               className="w-full p-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
               required
             ></textarea>
+            
+            {/* Ajout du champ d'upload d'image */}
+            <div className="space-y-2">
+              <label className="block text-sm font-medium text-gray-700">
+                Image de l'activité
+              </label>
+              <input
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-blue-50 file:text-blue-700 hover:file:bg-blue-100"
+              />
+              
+              {/* Aperçu de l'image */}
+              {imagePreview && (
+                <div className="mt-2">
+                  <img
+                    src={imagePreview}
+                    alt="Aperçu"
+                    className="h-40 w-auto object-cover rounded-lg"
+                  />
+                </div>
+              )}
+            </div>
+            
             <div className="flex justify-between">
               <button
                 type="submit"
@@ -150,6 +227,8 @@ const ManageActivite = () => {
                     setShowForm(false);
                     setNom("");
                     setDescription("");
+                    setImage(null);
+                    setImagePreview(null);
                   }}
                   type="button"
                   className="bg-gray-400 text-white px-4 py-2 rounded-lg hover:bg-gray-500 transition"
@@ -168,6 +247,7 @@ const ManageActivite = () => {
         <table className="min-w-full bg-white rounded-lg overflow-hidden shadow-md">
           <thead className="bg-gray-100">
             <tr>
+              <th className="text-left px-6 py-3">Image</th>
               <th className="text-left px-6 py-3">Nom</th>
               <th className="text-left px-6 py-3">Description</th>
               <th className="text-left px-6 py-3">Actions</th>
@@ -176,6 +256,19 @@ const ManageActivite = () => {
           <tbody>
             {filteredActivites.map((activite) => (
               <tr key={activite._id} className="hover:bg-gray-50 transition">
+                <td className="px-6 py-4">
+                  {activite.image ? (
+                    <img
+                      src={`http://localhost:5000${activite.image}`}
+                      alt={activite.nom}
+                      className="h-16 w-16 object-cover rounded"
+                    />
+                  ) : (
+                    <div className="h-16 w-16 bg-gray-200 rounded flex items-center justify-center">
+                      <span className="text-gray-400 text-xs">Pas d'image</span>
+                    </div>
+                  )}
+                </td>
                 <td className="px-6 py-4">{activite.nom}</td>
                 <td className="px-6 py-4">{activite.description}</td>
                 <td className="px-6 py-4 flex gap-2">

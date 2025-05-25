@@ -13,16 +13,19 @@ import ManageSallePage from "./components/dashboards/admin/ManageSallePage";
 import ManageAbonnementPage from "./components/dashboards/admin/ManageAbonnementPage";
 import ManageAffectationPage from "./components/dashboards/admin/ManageAffectationPage";
 import ManageAvisPage from "./components/dashboards/admin/ManageAvisPage";
+import NotificationsPage from "./components/NotificationsPage"; // Ajout
+
 import HomePage from "./components/HomePage";
 import SeancesByActivite from "./components/SeancesByActivite";
 import AllActivitesPage from "./components/AllActivitesPage";
 import CoachsPage from "./components/CoachsPage";
-import CoachProfile from "./components/CoachProfile"; // Ajout
+import CoachProfile from "./components/CoachProfile";
 import AbonnementList from "./components/AbonnementList";
 import MesAbonnements from "./components/MesAbonnements";
 import MesFactures from "./components/MesFactures";
 import MesReservations from "./components/MesReservations";
 import Facturation from "./components/Facturation";
+
 import "./App.css";
 
 const ProtectedRoute = ({ children, requiredRole }) => {
@@ -156,9 +159,17 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/activite/:id" element={<SeancesByActivite />} />
           <Route path="/coachs" element={<CoachsPage />} />
-          <Route path="/coach-profile/:id" element={<CoachProfile />} /> {/* Ajout */}
+          <Route path="/coach-profile/:id" element={<CoachProfile />} />
           <Route path="/abonnement" element={<AbonnementList />} />
           <Route path="/activites" element={<AllActivitesPage />} />
+          <Route
+            path="/notifications"
+            element={
+              <ProtectedRoute>
+                <NotificationsPage />
+              </ProtectedRoute>
+            }
+          />
 
           <Route
             path="/mes-abonnements"

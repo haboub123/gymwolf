@@ -1,16 +1,35 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, Link, useNavigate } from "react-router-dom";
+import { FaArrowLeft, FaCalendar, FaClock, FaHourglassHalf, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
 
 // Consistent token handling
 const getAuthToken = () => {
   return document.cookie
     .split("; ")
-    .find(row => row.startsWith("jwt_token_9antra="))
+    .find((row) => row.startsWith("jwt_token_9antra="))
     ?.split("=")[1];
 };
 
-export default function SeancesByActivite() {
+// Formatage des dates
+const formatDate = (date) => {
+  return new Date(date).toLocaleString("fr-FR", {
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  });
+};
+
+// Formatage des heures
+const formatTime = (time) => {
+  return time ? new Date(`1970-01-01T${time}`).toLocaleTimeString("fr-FR", {
+    hour: "2-digit",
+    minute: "2-digit",
+  }) : "N/A";
+};
+
+// Composant principal
+const SeancesByActivite = () => {
   const { id } = useParams();
   const [activite, setActivite] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -18,7 +37,7 @@ export default function SeancesByActivite() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  // Load activity and sessions
+  // Charger les détails de l'activité
   useEffect(() => {
     axios
       .get(`http://localhost:5000/Activite/getActiviteById/${id}`)
@@ -35,42 +54,29 @@ export default function SeancesByActivite() {
       });
   }, [id]);
 
-  // Handle reservation
+  // Gérer la réservation
   const handleReservation = (seanceId, nomSeance, date, heure) => {
     const token = getAuthToken();
 
     if (!token) {
-      // User not logged in - save reservation details and redirect
       sessionStorage.setItem(
         "pendingReservation",
-        JSON.stringify({ 
-          seance: seanceId, 
-          nomSeance, 
-          date, 
-          heure 
-        })
+        JSON.stringify({ seance: seanceId, nomSeance, date, heure })
       );
       navigate("/login");
     } else {
-      // User logged in - process reservation immediately
       processReservation(seanceId, nomSeance, date, heure);
     }
   };
 
-  // Process the reservation (for logged-in users)
+  // Traiter la réservation
   const processReservation = async (seanceId, nomSeance, date, heure) => {
     try {
       setLoading(true);
-      
-      // Create reservation
+
       const reservationResponse = await axios.post(
         "http://localhost:5000/Reservation/addReservation",
-        { 
-          seance: seanceId, 
-          nomSeance, 
-          date, 
-          heure 
-        },
+        { seance: seanceId, nomSeance, date, heure },
         { withCredentials: true }
       );
 
@@ -80,16 +86,33 @@ export default function SeancesByActivite() {
 
       const reservationId = reservationResponse.data.reservation._id;
 
-      // Assign reservation to user
       await axios.put(
         "http://localhost:5000/Reservation/affect",
         { reservationId },
         { withCredentials: true }
       );
 
-      setNotification("Réservation effectuée avec succès !");
-      // Short delay before redirect to show notification
-      setTimeout(() => navigate("/mes-reservations"), 1500);
+      // Ajouter une notification pour le coach
+      const user = JSON.parse(localStorage.getItem("user"));
+      const seanceResponse = await axios.get(`http://localhost:5000/Seance/getSeanceById/${seanceId}`);
+      const seance = seanceResponse.data.seance;
+      const coachIds = seance.coachs;
+
+      await axios.post(
+        "http://localhost:5000/notification/addNotification",
+        {
+          contenu: `Nouvelle réservation pour la séance "${nomSeance}" le ${formatDate(date)} à ${formatTime(heure)}`,
+          roleCible: "coach",
+          clients: coachIds,
+        },
+        { withCredentials: true }
+      );
+
+      setNotification("Réservation effectuée avec succès ! Une notification a été envoyée au coach.");
+      setTimeout(() => {
+        setNotification("");
+        navigate("/mes-reservations");
+      }, 3000);
     } catch (error) {
       console.error("Erreur lors de la réservation :", error);
       setError(
@@ -100,66 +123,154 @@ export default function SeancesByActivite() {
     }
   };
 
-  if (loading) return <div className="text-center mt-10">Chargement...</div>;
-  if (!activite) return <div className="text-center mt-10">Activité non trouvée.</div>;
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-900">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-yellow-400 border-solid mx-auto"></div>
+          <p className="mt-4 text-white text-lg">Chargement des séances...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!activite) {
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-900">
+        <div className="text-center">
+          <p className="text-2xl font-semibold text-white">Activité non trouvée</p>
+          <Link
+            to="/nos-activites"
+            className="mt-4 inline-flex items-center gap-2 text-yellow-400 hover:text-yellow-500 font-medium"
+          >
+            <FaArrowLeft /> Retour aux activités
+          </Link>
+        </div>
+      </div>
+    );
+  }
 
   return (
-    <div className="container mx-auto px-4 py-10">
-      <Link to="/nos-activites" className="text-blue-500 underline mb-6 inline-block">
-        ← Retour aux activités
-      </Link>
-
-      <h2 className="text-3xl font-bold mb-4">{activite.nom}</h2>
-      <p className="mb-6 text-gray-600">{activite.description}</p>
+    <div className="container mx-auto px-4 py-12 max-w-7xl bg-gray-900 min-h-screen">
+      <div className="bg-gray-800 shadow-lg rounded-lg p-8 mb-8">
+        <Link
+          to="/nos-activites"
+          className="inline-flex items-center gap-2 text-yellow-400 hover:text-yellow-500 font-medium mb-6 transition-colors"
+          aria-label="Retour à la liste des activités"
+        >
+          <FaArrowLeft /> Retour aux activités
+        </Link>
+        <div className="flex items-center gap-4">
+          <div className="flex-shrink-0">
+            <div className="h-16 w-16 bg-yellow-400/20 rounded-full flex items-center justify-center">
+              <FaCalendar className="h-8 w-8 text-yellow-400" />
+            </div>
+          </div>
+          <div>
+            <h2 className="text-4xl font-bold text-white">{activite.nom}</h2>
+            <p className="mt-2 text-gray-400 text-lg">{activite.description}</p>
+          </div>
+        </div>
+      </div>
 
       {notification && (
-        <div className="bg-green-100 text-green-800 px-4 py-2 rounded mb-4">
-          {notification}
+        <div
+          className="flex items-center gap-2 bg-green-900/20 text-green-400 px-4 py-3 rounded-lg mb-6 animate-fade-in"
+          role="alert"
+        >
+          <FaCheckCircle className="h-5 w-5" />
+          <span>{notification}</span>
         </div>
       )}
       {error && (
-        <div className="bg-red-100 text-red-800 px-4 py-2 rounded mb-4">
-          {error}
-          <button 
-            onClick={() => setError("")} 
-            className="ml-2 font-bold"
+        <div
+          className="flex items-center gap-2 bg-red-900/20 text-red-400 px-4 py-3 rounded-lg mb-6 animate-fade-in"
+          role="alert"
+        >
+          <FaTimesCircle className="h-5 w-5" />
+          <span>{error}</span>
+          <button
+            onClick={() => setError("")}
+            className="ml-auto text-red-400 hover:text-red-500 font-bold"
+            aria-label="Fermer l'erreur"
           >
             ×
           </button>
         </div>
       )}
 
-      <h3 className="text-2xl font-semibold mb-4">Séances associées :</h3>
+      <h3 className="text-2xl font-semibold text-white mb-6">Séances disponibles</h3>
       {activite.seances && activite.seances.length > 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {activite.seances.map((seance) => (
-            <div key={seance._id} className="bg-white shadow rounded p-4">
-              <h4 className="text-xl font-bold mb-2">{seance.titre}</h4>
-              <p><strong>Description:</strong> {seance.description}</p>
-              <p><strong>Date:</strong> {new Date(seance.date).toLocaleDateString()}</p>
-              <p><strong>Heure:</strong> {seance.heure}</p>
-              <p><strong>Durée:</strong> {seance.duree} min</p>
-
+            <div
+              key={seance._id}
+              className="bg-gray-800 shadow-md rounded-xl p-6 transition-all duration-300 hover:shadow-xl hover:-translate-y-1"
+              role="region"
+              aria-label={`Séance ${seance.titre}`}
+            >
+              <h4 className="text-xl font-bold text-white mb-3">{seance.titre}</h4>
+              <div className="space-y-2 text-gray-400">
+                <p className="flex items-center gap-2">
+                  <FaCalendar className="h-4 w-4 text-yellow-400" />
+                  <span>
+                    <strong>Date :</strong> {formatDate(seance.date)}
+                  </span>
+                </p>
+                <p className="flex items-center gap-2">
+                  <FaClock className="h-4 w-4 text-yellow-400" />
+                  <span>
+                    <strong>Heure :</strong> {formatTime(seance.heure)}
+                  </span>
+                </p>
+                <p className="flex items-center gap-2">
+                  <FaHourglassHalf className="h-4 w-4 text-yellow-400" />
+                  <span>
+                    <strong>Durée :</strong> {seance.duree} min
+                  </span>
+                </p>
+                <p>
+                  <strong>Description :</strong> {seance.description}
+                </p>
+              </div>
               <button
                 onClick={() =>
-                  handleReservation(
-                    seance._id,
-                    seance.titre,
-                    seance.date,
-                    seance.heure
-                  )
+                  handleReservation(seance._id, seance.titre, seance.date, seance.heure)
                 }
-                className="mt-4 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded"
+                className={`mt-4 w-full flex items-center justify-center gap-2 bg-yellow-400 text-gray-900 py-2 px-4 rounded-lg hover:bg-yellow-500 transition-all duration-200 ${
+                  loading ? "opacity-50 cursor-not-allowed" : ""
+                }`}
                 disabled={loading}
+                aria-label={`Réserver la séance ${seance.titre}`}
               >
-                {loading ? "En cours..." : "Réserver"}
+                {loading ? (
+                  <>
+                    <div className="animate-spin rounded-full h-5 w-5 border-t-2 border-gray-900"></div>
+                    En cours...
+                  </>
+                ) : (
+                  <>
+                    <FaCalendar className="h-4 w-4" />
+                    Réserver
+                  </>
+                )}
               </button>
             </div>
           ))}
         </div>
       ) : (
-        <p>Aucune séance associée à cette activité.</p>
+        <div className="text-center py-12 bg-gray-800 rounded-lg">
+          <p className="text-lg text-gray-400">Aucune séance associée à cette activité.</p>
+          <Link
+            to="/nos-activites"
+            className="mt-4 inline-flex items-center gap-2 text-yellow-400 hover:text-yellow-500 font-medium"
+          >
+            <FaArrowLeft /> Voir d'autres activités
+          </Link>
+        </div>
       )}
     </div>
   );
-}
+};
+
+export default SeancesByActivite;

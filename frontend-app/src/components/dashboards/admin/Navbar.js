@@ -54,13 +54,13 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="bg-white border-b border-gray-200 px-4 py-2.5 fixed left-0 right-0 top-0 z-50">
+      <nav className="bg-gray-900 border-b border-gray-700 px-4 py-2.5 fixed left-0 right-0 top-0 z-50">
         <div className="flex flex-wrap justify-between items-center">
           <div className="flex items-center">
-            <Link to="/" className="text-xl font-bold text-gray-800 mr-4">
+            <Link to="/" className="text-xl font-bold text-yellow-400 mr-4">
               Gym Wolf
             </Link>
-            <Link to="/" className="text-sm text-gray-500 hover:text-blue-500">
+            <Link to="/" className="text-sm text-gray-300 hover:text-yellow-400">
               Accueil
             </Link>
           </div>
@@ -69,7 +69,7 @@ export default function Navbar() {
             <div className="relative">
               <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
                 <svg
-                  className="w-5 h-5 text-gray-500"
+                  className="w-5 h-5 text-gray-400"
                   fill="currentColor"
                   viewBox="0 0 20 20"
                   xmlns="http://www.w3.org/2000/svg"
@@ -83,18 +83,18 @@ export default function Navbar() {
               </div>
               <input
                 type="text"
-                className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 p-2"
+                className="bg-gray-800 border border-gray-600 text-gray-200 text-sm rounded-lg focus:ring-yellow-400 focus:border-yellow-400 block w-full pl-10 p-2"
                 placeholder="Rechercher..."
               />
             </div>
           </form>
 
           <div className="flex items-center">
-            <div className="mr-4 text-sm text-gray-500">
+            <div className="mr-4 text-sm text-gray-400">
               {currentDateTime || "Chargement..."}
             </div>
             <div className="flex items-center space-x-3">
-              <span className="text-sm font-medium text-gray-700">{`Bonjour, ${userName}`}</span>
+              <span className="text-sm font-medium text-gray-200">{`Bonjour, ${userName}`}</span>
               <UserDropdown />
             </div>
           </div>
