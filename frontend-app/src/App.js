@@ -13,7 +13,9 @@ import ManageSallePage from "./components/dashboards/admin/ManageSallePage";
 import ManageAbonnementPage from "./components/dashboards/admin/ManageAbonnementPage";
 import ManageAffectationPage from "./components/dashboards/admin/ManageAffectationPage";
 import ManageAvisPage from "./components/dashboards/admin/ManageAvisPage";
-import NotificationsPage from "./components/NotificationsPage"; // Ajout
+import NotificationsPage from "./components/NotificationsPage";
+import ForgotPassword from "./components/auth/ForgotPassword";
+import ResetPassword from "./components/ResetPassword"; // Ajout de l'import
 
 import HomePage from "./components/HomePage";
 import SeancesByActivite from "./components/SeancesByActivite";
@@ -63,7 +65,8 @@ function App() {
         <Routes>
           <Route path="/auth/login" element={<Login />} />
           <Route path="/auth/register" element={<Register />} />
-          <Route path="/auth/forget" element={<h2>Page Mot de Passe Oublié</h2>} />
+          <Route path="/auth/forget" element={<ForgotPassword />} />
+         <Route path="/reset-password/:token" element={<ResetPassword />} />{/* Ajout de la route */}
 
           <Route
             path="/dashboard/admin"

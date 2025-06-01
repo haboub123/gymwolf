@@ -25,12 +25,12 @@
     "react-toastify": "^11.0.5",
     "web-vitals": "^2.1.4"
   },
-  "scripts": {
-    "start": "react-scripts start",
-    "build": "react-scripts build",
-    "test": "react-scripts test",
-    "eject": "react-scripts eject"
-  },
+ "scripts": {
+  "start": "cross-env HOST=0.0.0.0 react-scripts start",
+  "build": "react-scripts build",
+  "test": "react-scripts test",
+  "eject": "react-scripts eject"
+},
   "eslintConfig": {
     "extends": [
       "react-app",
@@ -51,6 +51,7 @@
   },
   "devDependencies": {
     "autoprefixer": "^10.2.5",
+    "cross-env": "^7.0.3",
     "postcss": "^8.2.13",
     "tailwindcss": "^2.2.19"
   }

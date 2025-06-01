@@ -118,7 +118,7 @@ export default function ManageClient({ color }) {
       <div className="px-6 py-4 border-b border-gray-200">
         <div className="flex justify-between items-center">
           <h3 className={"text-2xl font-semibold " + (color === "light" ? "text-gray-800" : "text-white")}>
-            List of Clients
+            Liste des clients
           </h3>
           <button
             onClick={handleAddClient}
@@ -127,7 +127,7 @@ export default function ManageClient({ color }) {
             <svg className="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 4v16m8-8H4" />
             </svg>
-            Add Client
+           Ajouter client
           </button>
         </div>
       </div>
@@ -168,7 +168,7 @@ export default function ManageClient({ color }) {
             {filteredClients.length === 0 ? (
               <tr>
                 <td colSpan="3" className="text-center py-6 text-gray-500">
-                  No clients found.
+                 Aucun client trouvé.
                 </td>
               </tr>
             ) : (
@@ -188,13 +188,13 @@ export default function ManageClient({ color }) {
                       onClick={() => handleUpdate(client._id)}
                       className="bg-blue-500 text-white px-3 py-1 rounded hover:bg-blue-600"
                     >
-                      Update
+                      Modifier
                     </button>
                     <button
                       onClick={() => handleDelete(client._id)}
                       className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
                     >
-                      Delete
+                      Supprimer
                     </button>
                   </td>
                 </tr>
@@ -208,7 +208,7 @@ export default function ManageClient({ color }) {
         <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
             <h2 className="text-xl font-semibold mb-4">
-              {isAddModalOpen ? "Add New Client" : "Update Client"}
+              {isAddModalOpen ? "Ajouter un nouveau client " : "Modifier Client"}
             </h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">
@@ -255,13 +255,13 @@ export default function ManageClient({ color }) {
                   onClick={closeModal}
                   className="mr-2 px-4 py-2 rounded bg-gray-300 hover:bg-gray-400"
                 >
-                  Cancel
+                  Annuler
                 </button>
                 <button
                   type="submit"
                   className="px-4 py-2 rounded bg-blue-600 text-white hover:bg-blue-700"
                 >
-                  {isAddModalOpen ? "Add" : "Update"}
+                  {isAddModalOpen ? "Ajouter" : "Modifier"}
                 </button>
               </div>
             </form>

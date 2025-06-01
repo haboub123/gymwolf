@@ -28,41 +28,59 @@ export default function Navbar() {
   return (
     <nav className="bg-black text-white px-6 py-4 shadow-md">
       <div className="container mx-auto flex justify-between items-center">
-        <img src={logo} alt="Gym Wolf Logo" className="h-12 w-auto" />
+        {/* "Gym Wolf" avec "Gym" en blanc, "Wolf" en jaune, suivi du logo */}
+        <div className="flex items-center gap-2">
+          <span className="text-2xl font-extrabold tracking-wide">
+            <span className="text-white">Gym</span>
+            <span className="text-yellow-400">Wolf</span>
+          </span>
+          <img src={logo} alt="Gym Wolf Logo" className="h-8 w-8" />
+        </div>
 
-        <ul className="hidden md:flex gap-8 font-medium">
-          <li className="hover:text-yellow-400 transition">
-            <a href="/">Accueil</a>
-          </li>
-          <li className="hover:text-yellow-400 transition">
-            <a href="/activites">Nos Activités</a>
-          </li>
-          <li className="hover:text-yellow-400 transition">
-            <a href="/coachs">Nos entraineurs</a>
-          </li>
-          <li className="hover:text-yellow-400 transition">
-            <a href={user?.role === "client" ? "/mes-abonnements" : "/abonnement"}>
-              {user?.role === "client" ? "Mes abonnements" : "Nos abonnements"}
-            </a>
-          </li>
-          {user?.role === "client" && (
+        {/* Menu principal */}
+        <div className="flex items-center gap-8">
+          <ul className="hidden md:flex gap-8 font-medium items-center">
             <li className="hover:text-yellow-400 transition">
-              <a href="/mes-reservations">Mes Réservations</a>
+              <a href="/">Accueil</a>
             </li>
-          )}
-          {!user ? (
             <li className="hover:text-yellow-400 transition">
-              <a href="/auth/login">Connexion</a>
+              <a href="/activites">Nos Activités</a>
             </li>
-          ) : (
-            <li
-              className="hover:text-yellow-400 transition cursor-pointer"
-              onClick={handleLogout}
-            >
-              Déconnexion
+            <li className="hover:text-yellow-400 transition">
+              <a href="/coachs">Nos entraineurs</a>
             </li>
+            <li className="hover:text-yellow-400 transition">
+              <a href={user?.role === "client" ? "/mes-abonnements" : "/abonnement"}>
+                {user?.role === "client" ? "Mes abonnements" : "Nos abonnements"}
+              </a>
+            </li>
+            {user?.role === "client" && (
+              <li className="hover:text-yellow-400 transition">
+                <a href="/mes-reservations">Mes Réservations</a>
+              </li>
+            )}
+            {!user ? (
+              <li className="hover:text-yellow-400 transition">
+                <a href="/auth/login">Connexion</a>
+              </li>
+            ) : (
+              <li
+                className="hover:text-yellow-400 transition cursor-pointer"
+                onClick={handleLogout}
+              >
+                Déconnexion
+              </li>
+            )}
+          </ul>
+          {/* Nom de l'adhérent avec style et position améliorés */}
+          {user && (
+            <div className="hidden md:flex items-center bg-gray-800/50 rounded-full px-4 py-2 border border-yellow-400/30">
+              <span className="text-yellow-400 font-medium">
+                Bienvenue, {user.username}
+              </span>
+            </div>
           )}
-        </ul>
+        </div>
 
         <div className="md:hidden">
           <button onClick={toggleMenu}>
@@ -93,6 +111,12 @@ export default function Navbar() {
             <button onClick={handleLogout} className="block hover:text-yellow-400">
               Déconnexion
             </button>
+          )}
+          {/* Nom de l'adhérent dans le menu mobile */}
+          {user && (
+            <div className="text-yellow-400 font-medium bg-gray-800/50 rounded px-3 py-2">
+              Bienvenue, {user.username}
+            </div>
           )}
         </div>
       )}

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom"; // Importer Link
 import placeholder from "../assets/img/team-4-470x470.png"; // Image par défaut
 
 export default function CoachSection() {
@@ -72,6 +73,15 @@ export default function CoachSection() {
           ) : (
             <p className="text-blueGray-500">Aucun coach disponible pour le moment.</p>
           )}
+        </div>
+        {/* Bouton "Voir plus" ajouté ici */}
+        <div className="text-center mt-8">
+          <Link
+            to="/coachs"
+            className="bg-gradient-to-r from-yellow-400 to-yellow-500 text-gray-900 px-6 py-3 rounded-full font-semibold hover:from-yellow-500 hover:to-yellow-600 transition-all duration-300 hover:shadow-lg hover:shadow-yellow-400/25"
+          >
+            Voir plus
+          </Link>
         </div>
       </div>
     </section>
