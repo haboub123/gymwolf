@@ -208,7 +208,7 @@ export default function ManageClient({ color }) {
         <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50">
           <div className="bg-white p-6 rounded-lg shadow-lg w-full max-w-md">
             <h2 className="text-xl font-semibold mb-4">
-              {isAddModalOpen ? "Ajouter un nouveau client " : "Modifier Client"}
+              {isAddModalOpen ? "Ajouter un nouveau" : "Update Client"}
             </h2>
             <form onSubmit={handleSubmit}>
               <div className="mb-4">

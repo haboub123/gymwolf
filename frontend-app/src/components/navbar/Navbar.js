@@ -23,6 +23,7 @@ export default function Navbar() {
     localStorage.removeItem("user");
     setUser(null);
     navigate("/");
+    window.location.reload();
   };
 
   return (

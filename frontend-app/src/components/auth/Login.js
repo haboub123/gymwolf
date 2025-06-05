@@ -4,41 +4,41 @@ import './Login.css';
 import gymBackground from '../../assets/img/gym-background.jpg';
 import { loginUser } from "../../services/apiUser";
 
-export default function Login() {
+export default function Connexion() {
   const [formData, setFormData] = useState({
     email: "",
     password: "",
     rememberMe: false,
   });
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [successMessage, setSuccessMessage] = useState("");
+  const [erreur, setErreur] = useState("");
+  const [chargement, setChargement] = useState(false);
+  const [messageSucces, setMessageSucces] = useState("");
 
   const navigate = useNavigate();
 
   useEffect(() => {
-    const checkLoggedIn = () => {
+    const verifierConnexion = () => {
       try {
-        const user = JSON.parse(localStorage.getItem("user"));
-        if (user) {
-          if (user.role === "admin") {
+        const utilisateur = JSON.parse(localStorage.getItem("user"));
+        if (utilisateur) {
+          if (utilisateur.role === "admin") {
             navigate("/dashboard/admin");
-          } else if (user.role === "coach") {
+          } else if (utilisateur.role === "coach") {
             navigate("/dashboard/coach");
-          } else if (user.role === "client") {
+          } else if (utilisateur.role === "client") {
             navigate("/");
           }
         }
-      } catch (error) {
-        console.error("Erreur lors de la vérification du statut de connexion :", error);
+      } catch (erreur) {
+        console.error("Erreur lors de la vérification du statut de connexion :", erreur);
         localStorage.removeItem("user");
       }
     };
 
-    checkLoggedIn();
+    verifierConnexion();
   }, [navigate]);
 
-  const handleInputChange = (e) => {
+  const gererChangementInput = (e) => {
     const { id, value, checked, type } = e.target;
     setFormData({
       ...formData,
@@ -46,10 +46,10 @@ export default function Login() {
     });
   };
 
-  const handleSubmit = async (e) => {
+  const gererSoumission = async (e) => {
     e.preventDefault();
-    setError("");
-    setIsLoading(true);
+    setErreur("");
+    setChargement(true);
 
     try {
       const data = await loginUser({
@@ -62,21 +62,20 @@ export default function Login() {
       }
 
       localStorage.setItem("user", JSON.stringify(data.user));
-      
-      const pendingReservation = sessionStorage.getItem("pendingReservation");
-      
-      if (pendingReservation) {
-        setSuccessMessage("Connexion réussie ! Finalisation de votre réservation...");
-        
+      localStorage.setItem("jwt_token_9antra", data.token);
+
+      const reservationEnAttente = sessionStorage.getItem("pendingReservation");
+
+      if (reservationEnAttente) {
+        setMessageSucces("Connexion réussie ! Finalisation de votre réservation...");
         setTimeout(() => {
-          setIsLoading(false);
+          setChargement(false);
           navigate("/mes-reservations");
         }, 1500);
       } else {
-        setSuccessMessage("Connexion réussie !");
-        
+        setMessageSucces("Connexion réussie !");
         setTimeout(() => {
-          setIsLoading(false);
+          setChargement(false);
           const role = data.user.role;
           if (role === "admin") {
             navigate("/dashboard/admin");
@@ -89,10 +88,10 @@ export default function Login() {
           }
         }, 1500);
       }
-    } catch (error) {
-      console.error("Erreur de connexion :", error);
-      setError(error.message || "Une erreur s'est produite. Veuillez réessayer.");
-      setIsLoading(false);
+    } catch (erreur) {
+      console.error("Erreur de connexion :", erreur);
+      setErreur(erreur.message || "Une erreur s'est produite. Veuillez réessayer.");
+      setChargement(false);
     }
   };
 
@@ -101,11 +100,11 @@ export default function Login() {
       <div className="login-wrapper">
         <div className="login-form">
           <h2 className="login-title">Connexion</h2>
-          
-          {error && <div className="error-message">{error}</div>}
-          {successMessage && <div className="success-message">{successMessage}</div>}
-          
-          <form onSubmit={handleSubmit}>
+
+          {erreur && <div className="error-message">{erreur}</div>}
+          {messageSucces && <div className="success-message">{messageSucces}</div>}
+
+          <form onSubmit={gererSoumission}>
             <div className="form-group">
               <label className="label" htmlFor="email">Email</label>
               <input
@@ -114,8 +113,8 @@ export default function Login() {
                 className="input"
                 placeholder="Email"
                 value={formData.email}
-                onChange={handleInputChange}
-                disabled={isLoading}
+                onChange={gererChangementInput}
+                disabled={chargement}
                 required
               />
             </div>
@@ -127,8 +126,8 @@ export default function Login() {
                 className="input"
                 placeholder="Mot de passe"
                 value={formData.password}
-                onChange={handleInputChange}
-                disabled={isLoading}
+                onChange={gererChangementInput}
+                disabled={chargement}
                 required
               />
             </div>
@@ -139,18 +138,18 @@ export default function Login() {
                   id="rememberMe"
                   className="checkbox"
                   checked={formData.rememberMe}
-                  onChange={handleInputChange}
-                  disabled={isLoading}
+                  onChange={gererChangementInput}
+                  disabled={chargement}
                 />
                 <span className="checkbox-text">Se souvenir de moi</span>
               </label>
             </div>
-            <button 
-              type="submit" 
+            <button
+              type="submit"
               className="submit-btn"
-              disabled={isLoading}
+              disabled={chargement}
             >
-              {isLoading ? "CHARGEMENT..." : "SE CONNECTER"}
+              {chargement ? "CHARGEMENT..." : "SE CONNECTER"}
             </button>
           </form>
           <div className="links">
@@ -159,7 +158,7 @@ export default function Login() {
           </div>
         </div>
         <div className="image-section">
-          <img src={gymBackground} alt="Gym Background" className="gym-image" />
+          <img src={gymBackground} alt="Image Salle de sport" className="gym-image" />
         </div>
       </div>
     </div>

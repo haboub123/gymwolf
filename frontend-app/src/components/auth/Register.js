@@ -39,11 +39,11 @@ export default function Register() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Submit button clicked, initiating registration...");
+    console.log("Bouton de soumission cliqué, démarrage de l'inscription...");
     setError("");
 
     if (!formData.terms) {
-      setError("Please agree to the Privacy Policy.");
+      setError("Veuillez accepter la politique de confidentialité.");
       return;
     }
 
@@ -53,15 +53,15 @@ export default function Register() {
         email: formData.email,
         password: formData.password,
       });
-      console.log("Response:", data);
+      console.log("Réponse :", data);
       if (!data.user) {
-        throw new Error(data.message || "Registration failed.");
+        throw new Error(data.message || "Échec de l'inscription.");
       }
 
-      alert("Registration successful! Please log in.");
+      alert("Inscription réussie ! Veuillez vous connecter.");
       window.location.href = "/auth/login";
     } catch (error) {
-      console.error("Registration Error:", error);
+      console.error("Erreur d'inscription :", error);
       setError(error.message);
     }
   };
@@ -70,18 +70,18 @@ export default function Register() {
     <div className="login-container">
       <div className="login-wrapper">
         <div className="login-form register-form">
-          <h2 className="login-title register-title">Register</h2>
+          <h2 className="login-title register-title">Inscription</h2>
           {error && <div className="error-message">{error}</div>}
           <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label className="label" htmlFor="username">
-                Username
+                Nom d'utilisateur
               </label>
               <input
                 type="text"
                 id="username"
                 className="input"
-                placeholder="Username"
+                placeholder="Nom d'utilisateur"
                 value={formData.username}
                 onChange={handleInputChange}
                 required
@@ -103,14 +103,14 @@ export default function Register() {
             </div>
             <div className="form-group">
               <label className="label" htmlFor="password">
-                Password
+                Mot de passe
               </label>
               <div className="password-input-wrapper">
                 <input
                   type={showPassword ? "text" : "password"}
                   id="password"
                   className="input"
-                  placeholder="Password"
+                  placeholder="Mot de passe"
                   value={formData.password}
                   onChange={handleInputChange}
                   required
@@ -131,7 +131,7 @@ export default function Register() {
                   <div className="strength-bar"></div>
                 </div>
                 <div className="strength-text">
-                  {["Weak", "Fair", "Good", "Strong"][strength - 1] || "Too short"}
+                  {["Faible", "Moyen", "Bon", "Fort"][strength - 1] || "Trop court"}
                 </div>
               </div>
             </div>
@@ -146,28 +146,28 @@ export default function Register() {
                   required
                 />
                 <span className="checkbox-text">
-                  I agree to the{" "}
+                  J'accepte la{" "}
                   <Link to="#" className="policy-link">
-                    Privacy Policy
+                    Politique de confidentialité
                   </Link>
                 </span>
               </label>
             </div>
             <button type="submit" className="submit-btn">
-              REGISTER
+              S'INSCRIRE
             </button>
           </form>
           <div className="links">
             <Link to="/auth/login" className="link">
-              Already have an account?
+              Vous avez déjà un compte ?
             </Link>
             <Link to="/auth/forget" className="link">
-              Forgot password?
+              Mot de passe oublié ?
             </Link>
           </div>
         </div>
         <div className="image-section">
-          <img src={gymBackground} alt="Gym Background" className="gym-image" />
+          <img src={gymBackground} alt="Image salle de sport" className="gym-image" />
         </div>
       </div>
     </div>

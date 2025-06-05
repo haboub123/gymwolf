@@ -21,11 +21,12 @@ export const registerUser = async (userData) => {
   }
 };
 
-// ✅ Login
+// ✅ Login (with token handling)
 export const loginUser = async (loginData) => {
   try {
     const response = await axios.post(`${API_URL}/users/login`, loginData);
-    return response.data;
+    const { user, token } = response.data; // On s'assure que le token est bien retourné
+    return { user, token };
   } catch (error) {
     handleApiError(error, "Login failed.");
   }
@@ -34,7 +35,10 @@ export const loginUser = async (loginData) => {
 // ✅ Get All Coaches (using the correct endpoint)
 export const getAllCoaches = async () => {
   try {
-    const response = await axios.get(`${API_URL}/users/coachs`);
+    const token = localStorage.getItem("jwt_token_9antra");
+    const response = await axios.get(`${API_URL}/users/coachs`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data;
   } catch (error) {
     handleApiError(error, "Failed to fetch coaches.");
@@ -44,7 +48,10 @@ export const getAllCoaches = async () => {
 // ✅ Get All Users
 export const getAllUsers = async () => {
   try {
-    const response = await axios.get(`${API_URL}/users/getAllUsers`);
+    const token = localStorage.getItem("jwt_token_9antra");
+    const response = await axios.get(`${API_URL}/users/getAllUsers`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data;
   } catch (error) {
     handleApiError(error, "Failed to fetch users.");
@@ -54,7 +61,10 @@ export const getAllUsers = async () => {
 // ✅ Delete Coach by ID
 export const deleteCoachById = async (id) => {
   try {
-    const response = await axios.delete(`${API_URL}/users/deleteUserById/${id}`);
+    const token = localStorage.getItem("jwt_token_9antra");
+    const response = await axios.delete(`${API_URL}/users/deleteUserById/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data;
   } catch (error) {
     handleApiError(error, "Failed to delete coach.");
@@ -64,7 +74,10 @@ export const deleteCoachById = async (id) => {
 // ✅ Delete User by ID
 export const deleteUserById = async (id) => {
   try {
-    const response = await axios.delete(`${API_URL}/users/deleteUserById/${id}`);
+    const token = localStorage.getItem("jwt_token_9antra");
+    const response = await axios.delete(`${API_URL}/users/deleteUserById/${id}`, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data;
   } catch (error) {
     handleApiError(error, "Failed to delete user.");
@@ -74,7 +87,10 @@ export const deleteUserById = async (id) => {
 // ✅ Update User by ID
 export const updateUserById = async (id, updatedData) => {
   try {
-    const response = await axios.put(`${API_URL}/users/updateUserById/${id}`, updatedData);
+    const token = localStorage.getItem("jwt_token_9antra");
+    const response = await axios.put(`${API_URL}/users/updateUserById/${id}`, updatedData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data;
   } catch (error) {
     handleApiError(error, "Failed to update user.");
@@ -84,7 +100,10 @@ export const updateUserById = async (id, updatedData) => {
 // ✅ Add Coach
 export const addUserCoach = async (coachData) => {
   try {
-    const response = await axios.post(`${API_URL}/users/addUserCoach`, coachData);
+    const token = localStorage.getItem("jwt_token_9antra");
+    const response = await axios.post(`${API_URL}/users/addUserCoach`, coachData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data;
   } catch (error) {
     handleApiError(error, "Failed to add coach.");
@@ -94,9 +113,11 @@ export const addUserCoach = async (coachData) => {
 // ✅ Add Coach with Image
 export const addCoachWithImage = async (formData) => {
   try {
+    const token = localStorage.getItem("jwt_token_9antra");
     const response = await axios.post(`${API_URL}/users/addCoachWithImg`, formData, {
       headers: {
         "Content-Type": "multipart/form-data",
+        Authorization: `Bearer ${token}`,
       },
     });
     return response.data;
@@ -108,14 +129,17 @@ export const addCoachWithImage = async (formData) => {
 // ✅ Add Client
 export const addUserClient = async (clientData) => {
   try {
-    const response = await axios.post(`${API_URL}/users/addUserClient`, clientData);
+    const token = localStorage.getItem("jwt_token_9antra");
+    const response = await axios.post(`${API_URL}/users/addUserClient`, clientData, {
+      headers: { Authorization: `Bearer ${token}` },
+    });
     return response.data;
   } catch (error) {
     handleApiError(error, "Failed to add client.");
   }
 };
 
-// ✅ Helper function for coach image URL
+// ✅ Helper function for coach image URL (Updated)
 export const getCoachImageUrl = (imagePath, defaultImage = "https://via.placeholder.com/150") => {
-  return imagePath ? `${API_URL}/files/${imagePath}` : defaultImage;
+  return imagePath ? `${API_URL}/uploads/${imagePath}` : defaultImage;
 };

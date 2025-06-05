@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom"; // Importer Link
-import placeholder from "../assets/img/team-4-470x470.png"; // Image par défaut
+import { Link } from "react-router-dom";
+import placeholder from "../assets/img/team-4-470x470.png";
+import { getCoachImageUrl } from "../services/apiUser"; // Ajoute cette importation
 
 export default function CoachSection() {
   const [coaches, setCoaches] = useState([]);
@@ -53,9 +54,7 @@ export default function CoachSection() {
                 <div className="px-6 text-center">
                   <img
                     alt={`coach-${coach.username}`}
-                    src={coach.user_image 
-                      ? `http://localhost:5000/files/${coach.user_image}` 
-                      : placeholder}
+                    src={getCoachImageUrl(coach.user_image, placeholder)} // Utilise getCoachImageUrl
                     className="shadow-lg rounded-full mx-auto max-w-120-px h-120-px object-cover transform hover:scale-110 transition-all duration-300"
                     onError={handleImageError}
                   />
@@ -74,7 +73,6 @@ export default function CoachSection() {
             <p className="text-blueGray-500">Aucun coach disponible pour le moment.</p>
           )}
         </div>
-        {/* Bouton "Voir plus" ajouté ici */}
         <div className="text-center mt-8">
           <Link
             to="/coachs"

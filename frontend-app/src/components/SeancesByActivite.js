@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { FaArrowLeft, FaCalendar, FaClock, FaHourglassHalf, FaCheckCircle, FaTimesCircle } from "react-icons/fa";
+      
+const user = JSON.parse(localStorage.getItem("user"));
 
 // Consistent token handling
 const getAuthToken = () => {
@@ -58,12 +60,12 @@ const SeancesByActivite = () => {
   const handleReservation = (seanceId, nomSeance, date, heure) => {
     const token = getAuthToken();
 
-    if (!token) {
-      sessionStorage.setItem(
+    if (!user) {
+      sessionStorage.setItem( 
         "pendingReservation",
         JSON.stringify({ seance: seanceId, nomSeance, date, heure })
       );
-      navigate("/login");
+      navigate("/auth/login");
     } else {
       processReservation(seanceId, nomSeance, date, heure);
     }
@@ -71,57 +73,62 @@ const SeancesByActivite = () => {
 
   // Traiter la réservation
   const processReservation = async (seanceId, nomSeance, date, heure) => {
-    try {
-      setLoading(true);
+  try {
+    console.log("ProcessReservation: ", seanceId, nomSeance, date, heure)
+    setLoading(true);
 
-      const reservationResponse = await axios.post(
-        "http://localhost:5000/Reservation/addReservation",
-        { seance: seanceId, nomSeance, date, heure },
-        { withCredentials: true }
-      );
+    // 1. Ajouter la réservation
+    const reservationResponse = await axios.post(
+      "http://localhost:5000/Reservation/addReservation",
+      { seance: seanceId, nomSeance, date, heure },
+      { withCredentials: true }
+    );
 
-      if (!reservationResponse.data.reservation) {
-        throw new Error("Échec de la création de la réservation");
-      }
-
-      const reservationId = reservationResponse.data.reservation._id;
-
-      await axios.put(
-        "http://localhost:5000/Reservation/affect",
-        { reservationId },
-        { withCredentials: true }
-      );
-
-      // Ajouter une notification pour le coach
-      const user = JSON.parse(localStorage.getItem("user"));
-      const seanceResponse = await axios.get(`http://localhost:5000/Seance/getSeanceById/${seanceId}`);
-      const seance = seanceResponse.data.seance;
-      const coachIds = seance.coachs;
-
-      await axios.post(
-        "http://localhost:5000/notification/addNotification",
-        {
-          contenu: `Nouvelle réservation pour la séance "${nomSeance}" le ${formatDate(date)} à ${formatTime(heure)}`,
-          roleCible: "coach",
-          clients: coachIds,
-        },
-        { withCredentials: true }
-      );
-
-      setNotification("Réservation effectuée avec succès ! Une notification a été envoyée au coach.");
-      setTimeout(() => {
-        setNotification("");
-        navigate("/mes-reservations");
-      }, 3000);
-    } catch (error) {
-      console.error("Erreur lors de la réservation :", error);
-      setError(
-        "Erreur lors de la réservation : " +
-          (error.response?.data?.message || error.message)
-      );
-      setLoading(false);
+    if (!reservationResponse.data.reservation) {
+      throw new Error("Échec de la création de la réservation");
     }
-  };
+
+    const reservationId = reservationResponse.data.reservation._id;
+
+    // 2. Affecter la réservation au client connecté
+    await axios.put(
+      "http://localhost:5000/Reservation/affect",
+      { reservationId },
+      { withCredentials: true }
+    );
+    // 3. Récupérer la séance pour trouver les coachs
+    const seanceResponse = await axios.get(
+      `http://localhost:5000/Seance/getSeanceById/${seanceId}`
+    );
+    const seance = seanceResponse.data.seance;
+    const coachIds = seance.coachs;
+
+    // 4. Envoyer une notification aux coachs
+    await axios.post(
+      "http://localhost:5000/notification/addNotification",
+      {
+        contenu: `Nouvelle réservation pour la séance "${nomSeance}" le ${formatDate(date)} à ${formatTime(heure)}`,
+        roleCible: "coach",
+        clients: coachIds,
+      },
+      { withCredentials: true }
+    );
+    console.log(localStorage.getItem("user"));
+
+    // 5. Navigation immédiate vers "mes réservations"
+    navigate("/mes-reservations");
+
+  } catch (error) {
+    console.error("Erreur lors de la réservation :", error);
+    setError(
+      "Erreur lors de la réservation : " +
+      (error.response?.data?.message || error.message)
+    );
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   if (loading) {
     return (

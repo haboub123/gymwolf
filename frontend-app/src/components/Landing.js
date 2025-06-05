@@ -20,7 +20,7 @@ export default function LandingFitness() {
     <>
       <main>
         {/* Section Hero - Différente selon l'état de connexion */}
-        {user ? (
+        {user && user.role =="client"  ? (
           // Design pour utilisateur connecté
           <div
             className="relative pt-24 pb-32 flex items-center justify-center min-h-screen bg-cover bg-center"
